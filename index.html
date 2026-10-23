@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speed Reader BD -- RSVP Reading Trainer</title>
+<meta name="description" content="Speed Reader BD -- a free, fully offline bilingual (Bangla/English) RSVP speed-reading trainer with comprehension quiz and session history.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">&#9673;</span>
+    <h1 id="appTitle" data-i18n="appTitle">Speed Reader BD</h1>
+  </div>
+  <button id="langToggle" class="lang-btn" type="button" aria-label="Switch language">&#2476;&#2494;&#2434;&#2482;&#2494;</button>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button class="tab active" data-tab="reader" data-i18n="tabReader" role="tab" type="button">Reader</button>
+  <button class="tab" data-tab="quiz" data-i18n="tabQuiz" role="tab" type="button">Quiz</button>
+  <button class="tab" data-tab="library" data-i18n="tabLibrary" role="tab" type="button">Library</button>
+  <button class="tab" data-tab="guide" data-i18n="tabGuide" role="tab" type="button">Guide</button>
+</nav>
+
+<main>
+  <!-- ============ READER ============ -->
+  <section id="tab-reader" class="panel active" role="tabpanel">
+    <div class="card">
+      <label class="field-label" for="textInput" data-i18n="pasteLabel">Paste your text here</label>
+      <textarea id="textInput" rows="5" data-i18n-ph="pastePh" placeholder="Paste an article, story, or study notes..."></textarea>
+      <div class="row wrap gap">
+        <span class="muted" data-i18n="samplesLabel">Samples:</span>
+        <button class="chip" id="sampleEn1" type="button">EN 1</button>
+        <button class="chip" id="sampleEn2" type="button">EN 2</button>
+        <button class="chip" id="sampleBn1" type="button">&#2476;&#2434; &#2535;</button>
+        <button class="chip" id="sampleBn2" type="button">&#2476;&#2434; &#2536;</button>
+        <button class="chip danger" id="clearText" type="button" data-i18n="clearBtn">Clear</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><span class="stat-num" id="statWords">0</span><span class="stat-lab" data-i18n="wordsLab">Words</span></div>
+        <div class="stat"><span class="stat-num" id="statChars">0</span><span class="stat-lab" data-i18n="charsLab">Characters</span></div>
+        <div class="stat"><span class="stat-num" id="statSentences">0</span><span class="stat-lab" data-i18n="sentLab">Sentences</span></div>
+        <div class="stat"><span class="stat-num" id="statEta">00:00</span><span class="stat-lab" data-i18n="etaLab">Est. time</span></div>
+      </div>
+      <p class="notice hidden" id="emptyNotice" data-i18n="emptyNotice">Add some text or pick a sample to start reading.</p>
+    </div>
+
+    <div class="card player-card">
+      <div class="flash-wrap">
+        <div class="flash-guide top" aria-hidden="true"></div>
+        <div id="flash" aria-live="polite"><span class="flash-idle" data-i18n="flashIdle">Press Play to start</span></div>
+        <div class="flash-guide bottom" aria-hidden="true"></div>
+      </div>
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="time-row">
+        <span><span data-i18n="elapsedLab">Elapsed</span>: <strong id="elapsed">00:00</strong></span>
+        <span><span data-i18n="remainLab">Remaining</span>: <strong id="remaining">00:00</strong></span>
+        <span><span data-i18n="chunkLab">Chunk</span>: <strong id="chunkPos">0/0</strong></span>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="btnPlay" type="button" data-i18n="playBtn">Play</button>
+        <button class="btn" id="btnPause" type="button" data-i18n="pauseBtn">Pause</button>
+        <button class="btn" id="btnRestart" type="button" data-i18n="restartBtn">Restart</button>
+      </div>
+      <div class="row wrap gap controls2">
+        <label class="wpm-lab"><span data-i18n="wpmLab">Words / minute</span>: <strong id="wpmVal">300</strong>
+          <input type="range" id="wpm" min="100" max="1000" step="25" value="300" aria-label="Words per minute">
+        </label>
+        <div class="seg" role="group" aria-label="Speed presets">
+          <button class="chip" data-wpm="200" type="button">200</button>
+          <button class="chip" data-wpm="300" type="button">300</button>
+          <button class="chip" data-wpm="450" type="button">450</button>
+          <button class="chip" data-wpm="650" type="button">650</button>
+        </div>
+        <div class="seg" role="group" aria-label="Words at once">
+          <span class="muted" data-i18n="atOnceLab">At once:</span>
+          <button class="chip chunk-btn active" data-chunk="1" type="button">1</button>
+          <button class="chip chunk-btn" data-chunk="2" type="button">2</button>
+          <button class="chip chunk-btn" data-chunk="3" type="button">3</button>
+        </div>
+      </div>
+      <p class="hint" data-i18n="keyHint">Keys: Space = play/pause, R = restart, arrows = step word</p>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="tab-quiz" class="panel" role="tabpanel">
+    <div class="card">
+      <p class="muted" data-i18n="quizIntro">Read a passage first, then test what you remember. Questions are generated from your own text.</p>
+      <div class="row gap">
+        <button class="btn primary" id="btnStartQuiz" type="button" data-i18n="startQuizBtn">Start quiz</button>
+        <button class="btn hidden" id="btnCheckQuiz" type="button" data-i18n="checkBtn">Check answers</button>
+      </div>
+      <p class="notice hidden" id="quizEmpty" data-i18n="quizEmpty">No passage loaded yet -- paste text or pick a sample in the Reader tab.</p>
+      <div id="quizArea"></div>
+      <p class="score hidden" id="quizScore"></p>
+    </div>
+  </section>
+
+  <!-- ============ LIBRARY ============ -->
+  <section id="tab-library" class="panel" role="tabpanel">
+    <div class="card">
+      <h2 data-i18n="libHead">Sample library</h2>
+      <p class="muted" data-i18n="libIntro">Short built-in passages to practice with. Your own pasted text is never saved.</p>
+      <ul class="lib-list">
+        <li><button class="lib-item" data-sample="en1" type="button"><strong>EN -- The Padma River</strong><span class="muted">~60 words</span></button></li>
+        <li><button class="lib-item" data-sample="en2" type="button"><strong>EN -- How RSVP reading works</strong><span class="muted">~80 words</span></button></li>
+        <li><button class="lib-item" data-sample="bn1" type="button"><strong>&#2476;&#2434; -- &#2466;&#2494;&#2453;&#2494;</strong><span class="muted">~&#2535;&#2534; &#2486;&#2476;&#2509;&#2470;</span></button></li>
+        <li><button class="lib-item" data-sample="bn2" type="button"><strong>&#2476;&#2434; -- &#2476;&#2439; &#2474;&#2524;&#2494;</strong><span class="muted">~&#2535;&#2536; &#2486;&#2476;&#2509;&#2470;</span></button></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="row space-between">
+        <h2 data-i18n="histHead">Session history</h2>
+        <button class="chip danger" id="btnClearHistory" type="button" data-i18n="clearHistBtn">Clear history</button>
+      </div>
+      <p class="muted hidden" id="historyEmpty" data-i18n="histEmpty">No sessions yet. Finished readings appear here.</p>
+      <ul class="hist-list" id="historyList"></ul>
+    </div>
+  </section>
+
+  <!-- ============ GUIDE ============ -->
+  <section id="tab-guide" class="panel" role="tabpanel">
+    <div class="card">
+      <h2 data-i18n="guideHead">How to train</h2>
+      <ol class="guide-list">
+        <li data-i18n="g1">Paste any text or pick a sample from the Library.</li>
+        <li data-i18n="g2">Start at 200-300 words per minute and keep the red letter in focus.</li>
+        <li data-i18n="g3">Raise the speed in small steps once reading feels comfortable.</li>
+        <li data-i18n="g4">Take the quiz to check comprehension -- speed without understanding is skimming.</li>
+        <li data-i18n="g5">Everything runs offline in your browser. No account, no uploads.</li>
+      </ol>
+      <p class="disclaimer" data-i18n="disclaimer">Demo learning tool. RSVP trains reading pace; comprehension varies by person and text.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p data-i18n="footer">Speed Reader BD | 100% offline | your text never leaves this device</p>
+</footer>
+
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

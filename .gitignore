@@ -1,0 +1,5 @@
+# Speed Reader BD - nothing to build, nothing secret to leak.
+node_modules/
+.DS_Store
+*.log
+.vscode/
